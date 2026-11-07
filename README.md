@@ -2,6 +2,7 @@
 
 > An e-commerce order system that evolves a .NET monolith into **8 independently deployable services** — with an API Gateway, BFF, async Saga over RabbitMQ, polyglot persistence, load balancing, caching, centralized logging and CI — all started with **one command**.
 
+[![CI](https://github.com/yael-72/architecture-project/actions/workflows/ci.yml/badge.svg)](https://github.com/yael-72/architecture-project/actions/workflows/ci.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.13-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)](https://www.rabbitmq.com)
