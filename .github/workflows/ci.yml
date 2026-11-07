@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/saradev841/architecturefinalproject
+  IMAGE_PREFIX: ghcr.io/yael-72/architecture-project
 
 jobs:
   # ── Job 1: Unit Tests ───────────────────────────────────────────────────────

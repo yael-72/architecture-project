@@ -36,8 +36,8 @@ git push → GitHub Actions מתעורר
     │  tag: abc1234 + latest           │
     └──────────────────────────────────┘
                ↓
-    ghcr.io/saradev841/orderservice:abc1234 ✅
-    ghcr.io/saradev841/apigateway:abc1234   ✅
+    ghcr.io/yael-72/architecture-project/orderservice:abc1234 ✅
+    ghcr.io/yael-72/architecture-project/apigateway:abc1234   ✅
     ... (כל 7 השירותים)
 ```
 
@@ -76,8 +76,8 @@ done
   with:
     push: true
     tags: |
-      ghcr.io/saradev841/.../orderservice:abc1234
-      ghcr.io/saradev841/.../orderservice:latest
+      ghcr.io/yael-72/architecture-project/orderservice:abc1234
+      ghcr.io/yael-72/architecture-project/orderservice:latest
 ```
 **מה קורה:** בונה Docker image לכל שירות ומעלה ל-GitHub Container Registry עם:
 - `abc1234` = 7 תווים ראשונים של commit SHA (מזהה ייחודי לכל גרסה)
@@ -105,13 +105,13 @@ done
 ## איך לראות את ה-Pipeline רץ?
 
 ### בדפדפן:
-1. כנסי ל-https://github.com/SaraDev841/ArchitectureFinalProject/actions
+1. כנסי ל-https://github.com/yael-72/architecture-project/actions
 2. תראי את כל ה-runs — ירוק ✅ = עבר, אדום ❌ = נכשל
 3. לחצי על run ספציפי → תראי את ה-jobs ואת הלוגים
 
 ### ה-Badge ב-README:
 ```
-[![CI](https://github.com/SaraDev841/ArchitectureFinalProject/actions/workflows/ci.yml/badge.svg)](...)
+[![CI](https://github.com/yael-72/architecture-project/actions/workflows/ci.yml/badge.svg)](...)
 ```
 מציג **תמיד** את הסטטוס העדכני של ה-pipeline.
 
@@ -120,7 +120,7 @@ done
 ## הפעלה ידנית (Manual Trigger)
 
 ### אפשרות 1 — דרך GitHub UI:
-1. כנסי ל-https://github.com/SaraDev841/ArchitectureFinalProject/actions
+1. כנסי ל-https://github.com/yael-72/architecture-project/actions
 2. בחרי "CI — Build, Test & Push"
 3. לחצי **"Run workflow"** → **"Run workflow"** (ירוק)
 
