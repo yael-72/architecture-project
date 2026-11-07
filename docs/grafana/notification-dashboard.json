@@ -1,0 +1,56 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "notification-service",
+    "title": "NotificationService Overview",
+    "tags": ["notifications", "microservices"],
+    "timezone": "browser",
+    "schemaVersion": 37,
+    "version": 1,
+    "refresh": "5s",
+    "panels": [
+      {
+        "type": "row",
+        "title": "Notification Service Metrics",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+      },
+      {
+        "type": "stat",
+        "title": "Orders Confirmed",
+        "datasource": null,
+        "targets": [
+          {
+            "expr": "sum(rate(notification_events_confirmed_total[5m]))",
+            "legendFormat": "confirmed"
+          }
+        ],
+        "gridPos": { "h": 6, "w": 12, "x": 0, "y": 1 }
+      },
+      {
+        "type": "stat",
+        "title": "Orders Cancelled",
+        "datasource": null,
+        "targets": [
+          {
+            "expr": "sum(rate(notification_events_cancelled_total[5m]))",
+            "legendFormat": "cancelled"
+          }
+        ],
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 1 }
+      },
+      {
+        "type": "table",
+        "title": "Recent Notification Events",
+        "datasource": null,
+        "targets": [
+          {
+            "expr": "topk(10, notification_event_timestamp)",
+            "legendFormat": "recent"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 7 }
+      }
+    ]
+  },
+  "overwrite": false
+}

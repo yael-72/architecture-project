@@ -1,0 +1,319 @@
+version: "3.9"
+
+services:
+  # ??? Infrastructure ????????????????????????????????????????????????????????
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: store_sqlserver
+    environment:
+      SA_PASSWORD: "Strong@Passw0rd!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1434:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U sa -P 'Strong@Passw0rd!' -Q 'SELECT 1' -No -C 2>/dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 90s
+
+  redis:
+    image: redis:7-alpine
+    container_name: store_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: store_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  seq:
+    image: datalust/seq:latest
+    container_name: store_seq
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+
+  mongo:
+    image: mongo:7.0
+    container_name: store_mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: store_grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+      GF_SECURITY_ADMIN_USER: "admin"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      seq:
+        condition: service_started
+
+  # ??? Microservices ?????????????????????????????????????????????????????????
+
+  userauthservice:
+    build:
+      context: .
+      dockerfile: UserAuthService/Dockerfile
+    container_name: userauthservice
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=userauthdb;User Id=sa;Password=Strong@Passw0rd!;TrustServerCertificate=True;"
+      Serilog__WriteTo__2__Args__serverUrl: "http://seq:80"
+    ports:
+      - "5001:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  productcatalogservice1:
+    build:
+      context: .
+      dockerfile: ProductCatalogService/Dockerfile
+    container_name: productcatalogservice1
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=catalogdb;User Id=sa;Password=Strong@Passw0rd!;TrustServerCertificate=True;"
+      ConnectionStrings__Redis: "redis:6379"
+      Serilog__WriteTo__2__Args__serverUrl: "http://seq:80"
+    ports:
+      - "5002:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  productcatalogservice2:
+    build:
+      context: .
+      dockerfile: ProductCatalogService/Dockerfile
+    container_name: productcatalogservice2
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=catalogdb;User Id=sa;Password=Strong@Passw0rd!;TrustServerCertificate=True;"
+      ConnectionStrings__Redis: "redis:6379"
+      Serilog__WriteTo__2__Args__serverUrl: "http://seq:80"
+    ports:
+      - "5009:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  orderservice:
+    build:
+      context: .
+      dockerfile: OrderService/Dockerfile
+    container_name: orderservice
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=orderdb;User Id=sa;Password=Strong@Passw0rd!;TrustServerCertificate=True;"
+      ConnectionStrings__Redis: "redis:6379"
+      ServiceUrls__CatalogService: "http://productcatalogservice1:8080/"
+      ServiceUrls__UserAuthService: "http://userauthservice:8080/"
+      RabbitMQ__Host: "rabbitmq"
+      Serilog__WriteTo__2__Args__serverUrl: "http://seq:80"
+    ports:
+      - "5003:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      productcatalogservice1:
+        condition: service_healthy
+      userauthservice:
+        condition: service_healthy
+
+  inventoryservice:
+    build:
+      context: .
+      dockerfile: InventoryService/Dockerfile
+    container_name: inventoryservice
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=inventorydb;User Id=sa;Password=Strong@Passw0rd!;TrustServerCertificate=True;"
+      RabbitMQ__Host: "rabbitmq"
+      Serilog__WriteTo__2__Args__serverUrl: "http://seq:80"
+    ports:
+      - "5005:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  notificationservice:
+    build:
+      context: .
+      dockerfile: NotificationService/Dockerfile
+    container_name: notificationservice
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      RabbitMQ__Host: "rabbitmq"
+      MongoDb__ConnectionString: "mongodb://mongo:27017"
+      MongoDb__Database: "notificationsdb"
+      Serilog__WriteTo__2__Args__serverUrl: "http://seq:80"
+    ports:
+      - "5006:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+
+  bffservice:
+    build:
+      context: .
+      dockerfile: BffService/Dockerfile
+    container_name: bffservice
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Redis: "redis:6379"
+      ServiceUrls__CatalogService: "http://productcatalogservice1:8080/"
+      ServiceUrls__OrderService: "http://orderservice:8080/"
+      ServiceUrls__UserAuthService: "http://userauthservice:8080/"
+      Serilog__WriteTo__2__Args__serverUrl: "http://seq:80"
+    ports:
+      - "5004:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      redis:
+        condition: service_healthy
+      productcatalogservice1:
+        condition: service_healthy
+      orderservice:
+        condition: service_healthy
+      userauthservice:
+        condition: service_healthy
+
+  apigateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    container_name: apigateway
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+    ports:
+      - "5000:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      userauthservice:
+        condition: service_healthy
+      productcatalogservice1:
+        condition: service_healthy
+      productcatalogservice2:
+        condition: service_healthy
+      orderservice:
+        condition: service_healthy
+      inventoryservice:
+        condition: service_healthy
+      notificationservice:
+        condition: service_healthy
+      bffservice:
+        condition: service_healthy
+
+volumes:
+  sqlserver_data:
+  redis_data:
+  rabbitmq_data:
+  seq_data:
+  mongo_data:
+  grafana_data:

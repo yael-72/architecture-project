@@ -1,0 +1,326 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // ── Individual service tasks ───────────────────────────────────────────
+
+    {
+      "label": "Run: ApiGateway",
+      "type": "shell",
+      "command": "dotnet run",
+      "options": {
+        "cwd": "${workspaceFolder}/ApiGateway",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "http://localhost:5000"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting ApiGateway",
+          "endsPattern": "Now listening on"
+        }
+      },
+      "presentation": {
+        "label": "ApiGateway",
+        "group": "build",
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+
+    {
+      "label": "Run: UserAuthService",
+      "type": "shell",
+      "command": "dotnet run",
+      "options": {
+        "cwd": "${workspaceFolder}/UserAuthService",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "http://localhost:5001"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting UserAuthService",
+          "endsPattern": "Now listening on"
+        }
+      },
+      "presentation": {
+        "label": "UserAuthService",
+        "group": "build",
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+
+    {
+      "label": "Run: ProductCatalogService",
+      "type": "shell",
+      "command": "dotnet run",
+      "options": {
+        "cwd": "${workspaceFolder}/ProductCatalogService",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "http://localhost:5002"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting ProductCatalogService",
+          "endsPattern": "Now listening on"
+        }
+      },
+      "presentation": {
+        "label": "ProductCatalogService",
+        "group": "build",
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+
+    {
+      "label": "Run: OrderService",
+      "type": "shell",
+      "command": "dotnet run",
+      "options": {
+        "cwd": "${workspaceFolder}/OrderService",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "http://localhost:5003"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting OrderService",
+          "endsPattern": "Now listening on"
+        }
+      },
+      "presentation": {
+        "label": "OrderService",
+        "group": "build",
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+
+    {
+      "label": "Run: InventoryService",
+      "type": "shell",
+      "command": "dotnet run",
+      "options": {
+        "cwd": "${workspaceFolder}/InventoryService",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "http://localhost:5005"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting InventoryService",
+          "endsPattern": "Now listening on"
+        }
+      },
+      "presentation": {
+        "label": "InventoryService",
+        "group": "build",
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+
+    {
+      "label": "Run: NotificationService",
+      "type": "shell",
+      "command": "dotnet run",
+      "options": {
+        "cwd": "${workspaceFolder}/NotificationService",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "http://localhost:5006"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting NotificationService",
+          "endsPattern": "Now listening on"
+        }
+      },
+      "presentation": {
+        "label": "NotificationService",
+        "group": "build",
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+
+    {
+      "label": "Run: BffService",
+      "type": "shell",
+      "command": "dotnet run",
+      "options": {
+        "cwd": "${workspaceFolder}/BffService",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "http://localhost:5004"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "BffService",
+          "endsPattern": "Now listening on"
+        }
+      },
+      "presentation": {
+        "label": "BffService",
+        "group": "build",
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+
+    {
+      "label": "Run: Frontend",
+      "type": "shell",
+      "command": "ng serve",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Building\\.\\.\\.",
+          "endsPattern": "Application bundle generation complete|Local:"
+        }
+      },
+      "presentation": {
+        "label": "Frontend",
+        "group": "build",
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+
+    // ── Infrastructure shortcut ────────────────────────────────────────────
+
+    {
+      "label": "Start: Infrastructure (Docker)",
+      "type": "shell",
+      "command": "docker compose up sqlserver redis rabbitmq seq",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "docker",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting",
+          "endsPattern": "ready to accept connections|Logging to"
+        }
+      },
+      "presentation": {
+        "label": "Infrastructure",
+        "group": "build",
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+
+    // ── Compound tasks ─────────────────────────────────────────────────────
+
+    {
+      "label": "Run All Services",
+      "dependsOn": [
+        "Run: ApiGateway",
+        "Run: UserAuthService",
+        "Run: ProductCatalogService",
+        "Run: OrderService",
+        "Run: InventoryService",
+        "Run: NotificationService",
+        "Run: BffService",
+        "Run: Frontend"
+      ],
+      "dependsOrder": "parallel",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+
+    {
+      "label": "Run All Services + Infrastructure",
+      "dependsOn": [
+        "Start: Infrastructure (Docker)",
+        "Run: ApiGateway",
+        "Run: UserAuthService",
+        "Run: ProductCatalogService",
+        "Run: OrderService",
+        "Run: InventoryService",
+        "Run: NotificationService",
+        "Run: BffService",
+        "Run: Frontend"
+      ],
+      "dependsOrder": "parallel",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

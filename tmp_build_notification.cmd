@@ -1,0 +1,1 @@
+cd /d c:\Users\USER\Desktop\ArchitectureProject && dotnet build NotificationService/NotificationService.csproj

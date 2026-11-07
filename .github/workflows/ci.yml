@@ -1,0 +1,105 @@
+name: CI — Build, Test & Push
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/saradev841/architecturefinalproject
+
+jobs:
+  # ── Job 1: Unit Tests ───────────────────────────────────────────────────────
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore OrderService.Tests/OrderService.Tests.csproj
+
+      - name: Build test project
+        run: dotnet build OrderService.Tests/OrderService.Tests.csproj --no-restore
+
+      - name: Run tests
+        run: dotnet test OrderService.Tests/OrderService.Tests.csproj --no-build --verbosity normal
+
+  # ── Job 2: Build all services ───────────────────────────────────────────────
+  build:
+    name: Build Services
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build all services
+        run: |
+          for proj in UserAuthService ProductCatalogService OrderService InventoryService NotificationService BffService ApiGateway; do
+            echo "=== Building $proj ==="
+            dotnet build $proj/$proj.csproj -c Release --no-incremental
+          done
+
+  # ── Job 3: Docker Images (only on push to master, not on PRs) ───────────────
+  docker:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [ test, build ]
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        service:
+          - name: userauthservice
+            dockerfile: UserAuthService/Dockerfile
+          - name: productcatalogservice
+            dockerfile: ProductCatalogService/Dockerfile
+          - name: orderservice
+            dockerfile: OrderService/Dockerfile
+          - name: inventoryservice
+            dockerfile: InventoryService/Dockerfile
+          - name: notificationservice
+            dockerfile: NotificationService/Dockerfile
+          - name: bffservice
+            dockerfile: BffService/Dockerfile
+          - name: apigateway
+            dockerfile: ApiGateway/Dockerfile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract short SHA
+        id: sha
+        run: echo "short=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Build and push ${{ matrix.service.name }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.service.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}:${{ steps.sha.outputs.short }}
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}:latest
